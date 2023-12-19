@@ -1,9 +1,9 @@
-const fs = require("fs"); // import fs with promise-based interfaces to allow asynchronous functionality
+const fs = require("fs"); 
 const readline = require("readline")
 
 const args = process.argv.slice(2); // retrieve array containing options entered when running the script in CLI
-const inputFileArg = args[0] || "input.csv"; // declare variable for inputfile option entered in CLI if provided or use default
-const outputFileArg = args[1] || "output.csv"; // declare variable for outputfile option entered in CLI if provided or use default
+const inputFileArg = args[0] || "input.csv"; 
+const outputFileArg = args[1] || "output.csv"; 
 
 const data = {}; // empty data object to store payer,payee:amount key-value pairs
 
@@ -24,8 +24,8 @@ async function processFile(
         console.error("Invalid line structure:", line);
         return;
       }
-      
-      const [payer, payee, amount] = line.split(",")
+
+      const [payer, payee, amount] = line.split(",").map((field) => field.trim())
       const key = `${payer}_${payee}`
 
       if (!isNaN(parseFloat(amount))) {
@@ -48,19 +48,19 @@ async function processFile(
 }
 
 function isValidLine(line) {
-  // Validate that the line has 3 comma-separated values
+  // Validate that the line has 3 comma-separated values, amount is numeric and that each column has no whitespaces 
   const values = line.split(",")
-  return values.length == 3 && !isNaN(parseFloat(values[2]));
+  return values.length == 3 &&
+  !isNaN(parseFloat(values[2])) &&
+  values.every((field) => field.trim().length > 0 )
 }
 
 async function summarizeData(data, outputFile) {
   const outputStream = fs.createWriteStream(outputFile, { encoding: "utf8" })
-  //const outputLines = []; // declare array to store content lines to be wriiten to outputFile
-
+  
   for (const key in data) {
     const [payer, payee] = key.split("_"); // iterate over keys in data object and destructure values of payer and payee
     const amount = parseFloat(data[key]).toFixed(2); // retrieve amount value with 2 decimal places in string format
-    //outputLines.push(`${payer},${payee},${amount}`);
     outputStream.write(`${payer},${payee},${amount}\n`);
   }
 
