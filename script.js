@@ -20,6 +20,11 @@ async function processFile(
 
     // Process each line using the stream
     rl.on("line", (line) => {
+      if(!isValidLine(line)) {
+        console.error("Invalid line structure:", line);
+        return;
+      }
+      
       const [payer, payee, amount] = line.split(",")
       const key = `${payer}_${payee}`
 
@@ -40,6 +45,12 @@ async function processFile(
     // function will throw an error if there was an issue reading the input file
     console.error("Error reading input file:", err.message);
   }
+}
+
+function isValidLine(line) {
+  // Validate that the line has 3 comma-separated values
+  const values = line.split(",")
+  return values.length == 3 && !isNaN(parseFloat(values[2]));
 }
 
 async function summarizeData(data, outputFile) {
